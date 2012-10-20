@@ -30,7 +30,7 @@ Then /I should see sorted (.*)/ do |field|
     count = count + 1
   end
 
-  list.sort.each do |element|
+  list.sort!.each do |element|
     prev = list.index(element)-1
     step %{I should see "#{list[prev]}" before "#{element}"} if (prev>=0)
   end
