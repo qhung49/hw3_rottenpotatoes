@@ -8,7 +8,6 @@ Given /the following movies exist/ do |movies_table|
                   :release_date => movie["release_date"],
                   :rating => movie["rating"])
   end
-  #flunk "Unimplemented"
 end
 
 # Make sure that one string (regexp) occurs before or after another one
@@ -17,7 +16,24 @@ end
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
   #  ensure that that e1 occurs before e2.
   #  page.content  is the entire content of the page as a string.
-  flunk "Unimplemented"
+  table = page.find("table#movies").text
+  assert table.index(e1) < table.index(e2)
+end
+
+Then /I should see sorted (.*)/ do |field|
+  start = 0 if field=="title"
+  start = 2 if field=="release date"
+  count = 0
+  list = []
+  page.all("table#movies td").each do |element|
+    list << element.text if (count%4==start)
+    count = count + 1
+  end
+
+  list.sort.each do |element|
+    prev = list.index(element)-1
+    step %{I should see "#{list[prev]}" before "#{element}"} if (prev>=0)
+  end
 end
 
 Then /I should (not )?see ratings: (.*)/ do |not_see, rating_list|
@@ -47,9 +63,6 @@ end
 #  "When I check the following ratings: G"
 
 When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
   rating_list.split(", ").each do |rating|
     if uncheck
       step %{I uncheck "ratings_#{rating}"}
